@@ -1,21 +1,27 @@
 plugins {
     id 'java'
-    id 'org.springframework.boot' version '2.7.8'
+    id 'org.springframework.boot' version "${springVersion}"
     id 'io.spring.dependency-management' version '1.1.5'
 }
 
 group = 'ru.panyukovnn'
 version = '1.0-SNAPSHOT'
 
+java.sourceCompatibility = JavaVersion.VERSION_17
+java.targetCompatibility = JavaVersion.VERSION_17
+
 repositories {
+    mavenLocal()
     mavenCentral()
 }
 
 dependencies {
-    implementation "org.springframework.boot:spring-boot-starter-web:2.7.8"
+    implementation "org.springframework.boot:spring-boot-starter-web"
 
-    implementation 'org.projectlombok:lombok:1.18.32'
-    annotationProcessor 'org.projectlombok:lombok:1.18.32'
+    implementation 'ru.panyukovnn:logging-starter:1.2-SNAPSHOT'
+
+    implementation 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
 
     implementation 'org.apache.commons:commons-lang3:3.0'
 }

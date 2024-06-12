@@ -1,5 +1,6 @@
 package ru.panyukovnn.linkshortener.repository.impl;
 
+import org.springframework.stereotype.Service;
 import ru.panyukovnn.linkshortener.model.LinkInfo;
 import ru.panyukovnn.linkshortener.repository.LinkInfoRepository;
 
@@ -8,6 +9,7 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
+@Service
 public class LinkInfoRepositoryImpl implements LinkInfoRepository {
 
     private final Map<String, LinkInfo> storage = new ConcurrentHashMap<>();
@@ -21,6 +23,8 @@ public class LinkInfoRepositoryImpl implements LinkInfoRepository {
     public LinkInfo saveShortLink(LinkInfo linkInfo) {
         linkInfo.setId(UUID.randomUUID());
 
-        return storage.put(linkInfo.getShortLink(), linkInfo);
+        storage.put(linkInfo.getShortLink(), linkInfo);
+
+        return linkInfo;
     }
 }
