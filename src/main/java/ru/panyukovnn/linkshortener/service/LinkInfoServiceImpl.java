@@ -7,6 +7,7 @@ import ru.panyukovnn.linkshortener.beanpostprocessor.LogExecutionTime;
 import ru.panyukovnn.linkshortener.dto.CreateShortLinkRequest;
 import ru.panyukovnn.linkshortener.dto.CreateShortLinkResponse;
 import ru.panyukovnn.linkshortener.exception.NotFoundException;
+import ru.panyukovnn.linkshortener.mapper.LinkInfoMapper;
 import ru.panyukovnn.linkshortener.model.LinkInfo;
 import ru.panyukovnn.linkshortener.property.LinkShortenerProperty;
 import ru.panyukovnn.linkshortener.repository.LinkInfoRepository;
@@ -16,7 +17,8 @@ public class LinkInfoServiceImpl implements LinkInfoService {
 
     @Autowired
     private LinkInfoRepository repository;
-
+    @Autowired
+    private LinkInfoMapper linkInfoMapper;
     @Autowired
     private LinkShortenerProperty linkShortenerProperty;
 
@@ -25,24 +27,13 @@ public class LinkInfoServiceImpl implements LinkInfoService {
 
     @LogExecutionTime
     public CreateShortLinkResponse createLinkInfo(CreateShortLinkRequest request) {
-        LinkInfo linkInfo = new LinkInfo();
-        linkInfo.setLink(request.getLink());
-        linkInfo.setEndTime(request.getEndTime());
-        linkInfo.setDescription(request.getDescription());
-        linkInfo.setActive(request.getActive());
+        LinkInfo linkInfo = linkInfoMapper.fromCreateRequest(request);
         linkInfo.setShortLink(RandomStringUtils.randomAlphanumeric(linkShortenerProperty.getShortLinkLength()));
         linkInfo.setOpeningCount(0L);
 
         repository.saveShortLink(linkInfo);
 
-        return CreateShortLinkResponse.builder()
-                .id(linkInfo.getId())
-                .link(linkInfo.getLink())
-                .endTime(linkInfo.getEndTime())
-                .description(linkInfo.getDescription())
-                .active(linkInfo.getActive())
-                .shortLink(linkInfo.getShortLink())
-                .build();
+        return linkInfoMapper.toResponse(linkInfo);
     }
 
     @LogExecutionTime
