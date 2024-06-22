@@ -2,12 +2,13 @@ package ru.panyukovnn.linkshortener.service;
 
 import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import ru.panyukovnn.linkshortener.beanpostprocessor.LogExecutionTime;
 import ru.panyukovnn.linkshortener.dto.CreateShortLinkRequest;
+import ru.panyukovnn.linkshortener.dto.CreateShortLinkResponse;
 import ru.panyukovnn.linkshortener.exception.NotFoundException;
 import ru.panyukovnn.linkshortener.model.LinkInfo;
+import ru.panyukovnn.linkshortener.property.LinkShortenerProperty;
 import ru.panyukovnn.linkshortener.repository.LinkInfoRepository;
 
 @Service
@@ -16,23 +17,32 @@ public class LinkInfoServiceImpl implements LinkInfoService {
     @Autowired
     private LinkInfoRepository repository;
 
+    @Autowired
+    private LinkShortenerProperty linkShortenerProperty;
+
     public LinkInfoServiceImpl() {
     }
 
-    @Value("${link-shortener.short-link-length}")
-    private int shortLinkLength;
-
     @LogExecutionTime
-    public LinkInfo createLinkInfo(CreateShortLinkRequest request) {
+    public CreateShortLinkResponse createLinkInfo(CreateShortLinkRequest request) {
         LinkInfo linkInfo = new LinkInfo();
         linkInfo.setLink(request.getLink());
         linkInfo.setEndTime(request.getEndTime());
         linkInfo.setDescription(request.getDescription());
         linkInfo.setActive(request.getActive());
-        linkInfo.setShortLink(RandomStringUtils.randomAlphanumeric(shortLinkLength));
+        linkInfo.setShortLink(RandomStringUtils.randomAlphanumeric(linkShortenerProperty.getShortLinkLength()));
         linkInfo.setOpeningCount(0L);
 
-        return repository.saveShortLink(linkInfo);
+        repository.saveShortLink(linkInfo);
+
+        return CreateShortLinkResponse.builder()
+                .id(linkInfo.getId())
+                .link(linkInfo.getLink())
+                .endTime(linkInfo.getEndTime())
+                .description(linkInfo.getDescription())
+                .active(linkInfo.getActive())
+                .shortLink(linkInfo.getShortLink())
+                .build();
     }
 
     @LogExecutionTime
