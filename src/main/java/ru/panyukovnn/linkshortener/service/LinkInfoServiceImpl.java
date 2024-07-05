@@ -12,6 +12,9 @@ import ru.panyukovnn.linkshortener.model.LinkInfo;
 import ru.panyukovnn.linkshortener.property.LinkShortenerProperty;
 import ru.panyukovnn.linkshortener.repository.LinkInfoRepository;
 
+import java.util.List;
+import java.util.UUID;
+
 @Service
 public class LinkInfoServiceImpl implements LinkInfoService {
 
@@ -40,5 +43,17 @@ public class LinkInfoServiceImpl implements LinkInfoService {
     public LinkInfo getByShortLink(String shortLink) {
         return repository.findByShortLink(shortLink)
                 .orElseThrow(() -> new NotFoundException("Не удалось найти длинную ссылку по короткой: " + shortLink));
+    }
+
+    @Override
+    public void deleteById(UUID id) {
+        repository.deleteById(id);
+    }
+
+    @Override
+    public List<CreateShortLinkResponse> getAll() {
+        return repository.getAll().stream()
+            .map(linkInfoMapper::toResponse)
+            .toList();
     }
 }
