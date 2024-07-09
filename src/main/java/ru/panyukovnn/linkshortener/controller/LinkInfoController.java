@@ -2,11 +2,11 @@ package ru.panyukovnn.linkshortener.controller;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.slf4j.MDC;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.panyukovnn.linkshortener.dto.CreateShortLinkRequest;
-import ru.panyukovnn.linkshortener.dto.CreateShortLinkResponse;
+import ru.panyukovnn.linkshortener.dto.FilterLinkInfoRequest;
+import ru.panyukovnn.linkshortener.dto.LinkInfoResponse;
 import ru.panyukovnn.linkshortener.dto.IdRequest;
 import ru.panyukovnn.linkshortener.dto.common.CommonRequest;
 import ru.panyukovnn.linkshortener.dto.common.CommonResponse;
@@ -24,20 +24,20 @@ public class LinkInfoController {
     private final LinkInfoService linkInfoService;
 
     @PostMapping
-    public CommonResponse<CreateShortLinkResponse> postCreateShortLink(
+    public CommonResponse<LinkInfoResponse> postCreateShortLink(
             @RequestBody @Valid CommonRequest<CreateShortLinkRequest> request) {
-        CreateShortLinkResponse createShortLinkResponse = linkInfoService.createLinkInfo(request.getBody());
+        LinkInfoResponse linkInfoResponse = linkInfoService.createLinkInfo(request.getBody());
 
-        return CommonResponse.<CreateShortLinkResponse>builder()
-                .body(createShortLinkResponse)
+        return CommonResponse.<LinkInfoResponse>builder()
+                .body(linkInfoResponse)
                 .build();
     }
 
-    @GetMapping
-    public CommonResponse<List<CreateShortLinkResponse>> getAll() {
-        List<CreateShortLinkResponse> linkInfoResponses = linkInfoService.getAll();
+    @PostMapping("/filter")
+    public CommonResponse<List<LinkInfoResponse>> filter(@RequestBody @Valid CommonRequest<FilterLinkInfoRequest> request) {
+        List<LinkInfoResponse> linkInfoResponses = linkInfoService.findByFilter(request.getBody());
 
-        return CommonResponse.<List<CreateShortLinkResponse>>builder()
+        return CommonResponse.<List<LinkInfoResponse>>builder()
             .body(linkInfoResponses)
             .build();
     }

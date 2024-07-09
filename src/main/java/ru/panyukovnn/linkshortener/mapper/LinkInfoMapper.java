@@ -3,7 +3,7 @@ package ru.panyukovnn.linkshortener.mapper;
 import org.mapstruct.Mapper;
 import org.springframework.stereotype.Component;
 import ru.panyukovnn.linkshortener.dto.CreateShortLinkRequest;
-import ru.panyukovnn.linkshortener.dto.CreateShortLinkResponse;
+import ru.panyukovnn.linkshortener.dto.LinkInfoResponse;
 import ru.panyukovnn.linkshortener.model.LinkInfo;
 
 @Component
@@ -12,5 +12,5 @@ public interface LinkInfoMapper {
 
     LinkInfo fromCreateRequest(CreateShortLinkRequest request);
 
-    CreateShortLinkResponse toResponse(LinkInfo linkInfo);
+    LinkInfoResponse toResponse(LinkInfo linkInfo);
 }

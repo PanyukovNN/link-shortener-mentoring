@@ -5,7 +5,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.panyukovnn.linkshortener.beanpostprocessor.LogExecutionTime;
 import ru.panyukovnn.linkshortener.dto.CreateShortLinkRequest;
-import ru.panyukovnn.linkshortener.dto.CreateShortLinkResponse;
+import ru.panyukovnn.linkshortener.dto.FilterLinkInfoRequest;
+import ru.panyukovnn.linkshortener.dto.LinkInfoResponse;
 import ru.panyukovnn.linkshortener.exception.NotFoundException;
 import ru.panyukovnn.linkshortener.mapper.LinkInfoMapper;
 import ru.panyukovnn.linkshortener.model.LinkInfo;
@@ -29,20 +30,24 @@ public class LinkInfoServiceImpl implements LinkInfoService {
     }
 
     @LogExecutionTime
-    public CreateShortLinkResponse createLinkInfo(CreateShortLinkRequest request) {
+    public LinkInfoResponse createLinkInfo(CreateShortLinkRequest request) {
         LinkInfo linkInfo = linkInfoMapper.fromCreateRequest(request);
         linkInfo.setShortLink(RandomStringUtils.randomAlphanumeric(linkShortenerProperty.getShortLinkLength()));
         linkInfo.setOpeningCount(0L);
 
-        repository.saveShortLink(linkInfo);
+        repository.save(linkInfo);
 
         return linkInfoMapper.toResponse(linkInfo);
     }
 
     @LogExecutionTime
     public LinkInfo getByShortLink(String shortLink) {
-        return repository.findByShortLink(shortLink)
-                .orElseThrow(() -> new NotFoundException("Не удалось найти длинную ссылку по короткой: " + shortLink));
+        LinkInfo linkInfo = repository.findByShortLinkAndActiveTrue(shortLink)
+            .orElseThrow(() -> new NotFoundException("Не удалось найти длинную ссылку по короткой: " + shortLink));
+
+        repository.incrementOpeningCountByShortLink(shortLink);
+
+        return linkInfo;
     }
 
     @Override
@@ -51,8 +56,13 @@ public class LinkInfoServiceImpl implements LinkInfoService {
     }
 
     @Override
-    public List<CreateShortLinkResponse> getAll() {
-        return repository.getAll().stream()
+    public List<LinkInfoResponse> findByFilter(FilterLinkInfoRequest filterRequest) {
+        return repository.findByFilter(
+                filterRequest.getLinkPart(),
+                filterRequest.getEndTimeFrom(),
+                filterRequest.getEndTimeTo(),
+                filterRequest.getDescriptionPart(),
+                filterRequest.getActive()).stream()
             .map(linkInfoMapper::toResponse)
             .toList();
     }
