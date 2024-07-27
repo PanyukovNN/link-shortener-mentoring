@@ -17,6 +17,7 @@ spring:
   jpa:
     hibernate:
       ddl-auto: validate
+    open-in-view: false
 
 link-shortener:
   short-link-length: 8

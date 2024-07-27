@@ -1,24 +1,30 @@
 package ru.panyukovnn.linkshortener.controller;
 
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
-import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import ru.panyukovnn.linkshortener.dto.common.CommonResponse;
 import ru.panyukovnn.linkshortener.dto.common.ValidationError;
+import ru.panyukovnn.linkshortener.exception.NotFoundPageException;
 
 import java.util.List;
 
 @Slf4j
 @RestControllerAdvice
+@RequiredArgsConstructor
 public class LinkShortenerExceptionHandler {
+
+    private final String notFoundPage;
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public CommonResponse<?> handleMethodArgumentNotValidException(MethodArgumentNotValidException e) {
@@ -55,6 +61,15 @@ public class LinkShortenerExceptionHandler {
         }
 
         return handleException(e);
+    }
+
+    @ExceptionHandler(NotFoundPageException.class)
+    public ResponseEntity<String> handleNotFoundPageException(NotFoundPageException e) {
+        log.error(e.getMessage(), e);
+
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+            .contentType(MediaType.TEXT_HTML)
+            .body(notFoundPage);
     }
 
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
