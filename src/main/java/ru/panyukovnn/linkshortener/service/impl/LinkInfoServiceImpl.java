@@ -1,4 +1,4 @@
-package ru.panyukovnn.linkshortener.service;
+package ru.panyukovnn.linkshortener.service.impl;
 
 import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -7,16 +7,16 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
-import ru.panyukovnn.linkshortener.beanpostprocessor.LogExecutionTime;
-import ru.panyukovnn.linkshortener.dto.CreateShortLinkRequest;
-import ru.panyukovnn.linkshortener.dto.FilterLinkInfoRequest;
-import ru.panyukovnn.linkshortener.dto.LinkInfoResponse;
-import ru.panyukovnn.linkshortener.dto.PageableRequest;
+import org.springframework.util.StringUtils;
+import ru.panyukovnn.linkshortener.dto.*;
+import ru.panyukovnn.linkshortener.exception.NotFoundException;
 import ru.panyukovnn.linkshortener.exception.NotFoundPageException;
 import ru.panyukovnn.linkshortener.mapper.LinkInfoMapper;
 import ru.panyukovnn.linkshortener.model.LinkInfo;
 import ru.panyukovnn.linkshortener.property.LinkShortenerProperty;
 import ru.panyukovnn.linkshortener.repository.LinkInfoRepository;
+import ru.panyukovnn.linkshortener.service.LinkInfoService;
+import ru.panyukovnn.loggingstarter.aspect.LogExecutionTime;
 
 import java.time.ZonedDateTime;
 import java.util.List;
@@ -31,9 +31,6 @@ public class LinkInfoServiceImpl implements LinkInfoService {
     private LinkInfoMapper linkInfoMapper;
     @Autowired
     private LinkShortenerProperty linkShortenerProperty;
-
-    public LinkInfoServiceImpl() {
-    }
 
     @LogExecutionTime
     public LinkInfoResponse createLinkInfo(CreateShortLinkRequest request) {
@@ -62,6 +59,7 @@ public class LinkInfoServiceImpl implements LinkInfoService {
     }
 
     @Override
+    @LogExecutionTime
     public List<LinkInfoResponse> findByFilter(FilterLinkInfoRequest filterRequest) {
         Pageable pageable = createPageable(filterRequest);
 
@@ -74,6 +72,29 @@ public class LinkInfoServiceImpl implements LinkInfoService {
                 pageable).stream()
             .map(linkInfoMapper::toResponse)
             .toList();
+    }
+
+    @Override
+    public LinkInfoResponse updateLinkInfo(UpdateShortLinkRequest updateRequest) {
+        LinkInfo linkInfo = repository.findById(updateRequest.getId())
+            .orElseThrow(() -> new NotFoundException("Не удалось найти длинную ссылку по id: " + updateRequest.getId()));
+
+        if (StringUtils.hasText(updateRequest.getLink())) {
+            linkInfo.setLink(updateRequest.getLink());
+        }
+        if (updateRequest.getActive() != null) {
+            linkInfo.setActive(updateRequest.getActive());
+        }
+        if (updateRequest.getEndTime() != null) {
+            linkInfo.setEndTime(updateRequest.getEndTime());
+        }
+        if (StringUtils.hasText(updateRequest.getDescription())) {
+            linkInfo.setDescription(updateRequest.getDescription());
+        }
+
+        repository.save(linkInfo);
+
+        return linkInfoMapper.toResponse(linkInfo);
     }
 
     private static Pageable createPageable(FilterLinkInfoRequest filterRequest) {

@@ -4,10 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import ru.panyukovnn.linkshortener.dto.CreateShortLinkRequest;
-import ru.panyukovnn.linkshortener.dto.FilterLinkInfoRequest;
-import ru.panyukovnn.linkshortener.dto.LinkInfoResponse;
-import ru.panyukovnn.linkshortener.dto.IdRequest;
+import ru.panyukovnn.linkshortener.dto.*;
 import ru.panyukovnn.linkshortener.dto.common.CommonRequest;
 import ru.panyukovnn.linkshortener.dto.common.CommonResponse;
 import ru.panyukovnn.linkshortener.service.LinkInfoService;
@@ -39,6 +36,15 @@ public class LinkInfoController {
 
         return CommonResponse.<List<LinkInfoResponse>>builder()
             .body(linkInfoResponses)
+            .build();
+    }
+
+    @PatchMapping
+    public CommonResponse<LinkInfoResponse> patchUpdateShortLink(@RequestBody @Validated CommonRequest<UpdateShortLinkRequest> request) {
+        LinkInfoResponse linkInfo = linkInfoService.updateLinkInfo(request.getBody());
+
+        return CommonResponse.<LinkInfoResponse>builder()
+            .body(linkInfo)
             .build();
     }
 
